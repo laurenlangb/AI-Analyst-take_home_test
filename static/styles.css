@@ -55,7 +55,8 @@ h1 {
 }
 
 .table-section,
-.chat-section {
+.chat-section,
+.login-card {
   border: 1px solid var(--line);
   border-radius: 8px;
   background: var(--surface);
@@ -154,12 +155,14 @@ h2 {
   padding: 0 12px;
 }
 
-.chat-form input:focus {
+.chat-form input:focus,
+.login-card input:focus {
   border-color: var(--accent);
   outline: 3px solid rgba(15, 118, 110, 0.16);
 }
 
-.chat-form button {
+.chat-form button,
+.login-card button {
   height: 42px;
   border: 0;
   border-radius: 6px;
@@ -168,10 +171,14 @@ h2 {
   cursor: pointer;
   font: inherit;
   font-weight: 700;
+}
+
+.chat-form button {
   padding: 0 18px;
 }
 
-.chat-form button:hover {
+.chat-form button:hover,
+.login-card button:hover {
   background: #0d655e;
 }
 
@@ -182,6 +189,76 @@ h2 {
   overflow: hidden;
   clip: rect(0, 0, 0, 0);
   white-space: nowrap;
+}
+
+.header-meta {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.user-name {
+  color: var(--muted);
+  font-size: 0.9rem;
+  font-weight: 700;
+}
+
+.login-shell {
+  min-height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+}
+
+.login-card {
+  width: min(380px, 100%);
+  display: flex;
+  flex-direction: column;
+  padding: 28px;
+}
+
+.login-card h1 {
+  margin-bottom: 4px;
+  font-size: 1.6rem;
+}
+
+.login-intro {
+  margin: 0 0 14px;
+  color: var(--muted);
+  font-size: 0.9rem;
+}
+
+.login-error {
+  margin: 0 0 12px;
+  border: 1px solid #e3b1b1;
+  border-radius: 6px;
+  background: #fcf0f0;
+  color: #9a2a2a;
+  padding: 8px 10px;
+  font-size: 0.88rem;
+}
+
+.login-card label {
+  margin-bottom: 4px;
+  color: var(--muted);
+  font-size: 0.85rem;
+  font-weight: 700;
+}
+
+.login-card input {
+  height: 40px;
+  margin-bottom: 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--text);
+  font: inherit;
+  padding: 0 12px;
+}
+
+.login-card button {
+  margin-top: 4px;
 }
 
 @media (max-width: 720px) {
