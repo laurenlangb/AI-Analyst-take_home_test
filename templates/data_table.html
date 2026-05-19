@@ -27,6 +27,24 @@
           </table>
         </div>
       </section>
+
+      <section class="chat-section" aria-label="Chat with offer data">
+        <h2>Ask About The Data</h2>
+
+        <div class="chat-answer" id="chat-answer">{{ chat_placeholder }}</div>
+
+        <form class="chat-form" id="chat-form">
+          <label class="sr-only" for="chat-input">Question</label>
+          <input
+            id="chat-input"
+            name="message"
+            type="text"
+            placeholder="Ask about leases, finance rates, models, or offers"
+            autocomplete="off"
+          />
+          <button type="submit">Ask</button>
+        </form>
+      </section>
     </main>
   </body>
 </html>

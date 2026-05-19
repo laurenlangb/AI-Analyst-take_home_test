@@ -1,6 +1,12 @@
 const tableHead = document.querySelector("#offers-head");
 const tableBody = document.querySelector("#offers-body");
 const rowCount = document.querySelector("#row-count");
+const chatAnswer = document.querySelector("#chat-answer");
+const chatForm = document.querySelector("#chat-form");
+const chatInput = document.querySelector("#chat-input");
+
+// Empty-state text the server rendered into the answer box; reused for blank input.
+const chatPlaceholder = chatAnswer.textContent;
 
 // Convert database column names into readable table headers.
 function formatHeader(value) {
@@ -52,5 +58,43 @@ async function loadOffers() {
     rowCount.textContent = "Error";
   }
 }
+
+// Send the user's question to the chat API and display the answer.
+async function submitChat(message) {
+  chatAnswer.textContent = "Thinking...";
+
+  try {
+    const response = await fetch("/api/chat", {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ message }),
+    });
+
+    if (!response.ok) {
+      throw new Error("Could not load chat answer");
+    }
+
+    const payload = await response.json();
+    chatAnswer.textContent = payload.answer;
+  } catch (error) {
+    chatAnswer.textContent = "Unable to answer right now.";
+  }
+}
+
+chatForm.addEventListener("submit", (event) => {
+  event.preventDefault();
+
+  const message = chatInput.value.trim();
+
+  if (!message) {
+    chatAnswer.textContent = chatPlaceholder;
+    return;
+  }
+
+  submitChat(message);
+  chatInput.value = "";
+});
 
 loadOffers();
