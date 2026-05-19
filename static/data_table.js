@@ -42,11 +42,23 @@ function renderTable(rows) {
   rowCount.textContent = `${rows.length} row${rows.length === 1 ? "" : "s"}`;
 }
 
+// Send the browser to the login page when a request returns 401 Unauthorized.
+function redirectIfUnauthorized(response) {
+  if (response.status === 401) {
+    window.location.href = "/login";
+    return true;
+  }
+  return false;
+}
+
 // Fetch offer data from the API and render it into the table.
 async function loadOffers() {
   try {
     const response = await fetch("/api/data");
 
+    if (redirectIfUnauthorized(response)) {
+      return;
+    }
     if (!response.ok) {
       throw new Error("Could not load offers");
     }
@@ -72,6 +84,9 @@ async function submitChat(message) {
       body: JSON.stringify({ message }),
     });
 
+    if (redirectIfUnauthorized(response)) {
+      return;
+    }
     if (!response.ok) {
       throw new Error("Could not load chat answer");
     }
