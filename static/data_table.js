@@ -33,7 +33,7 @@ function renderTable(rows) {
     .map(
       (row) => `
         <tr>
-          ${columns.map((column) => `<td>${row[column] || ""}</td>`).join("")}
+          ${columns.map((column) => `<td><div class="cell">${row[column] || ""}</div></td>`).join("")}
         </tr>
       `,
     )

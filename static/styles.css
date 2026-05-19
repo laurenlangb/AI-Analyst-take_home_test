@@ -92,7 +92,12 @@ td {
   border-right: 1px solid var(--line);
   padding: 10px 12px;
   text-align: left;
-  white-space: nowrap;
+  vertical-align: top;
+}
+
+.cell {
+  max-width: 240px;
+  overflow-wrap: anywhere;
 }
 
 th {
