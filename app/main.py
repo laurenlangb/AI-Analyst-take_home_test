@@ -13,6 +13,7 @@ from app.auth import (
     require_user,
 )
 from app.database import fetch_offers
+from app.gemini import generate_sql
 
 
 class ChatRequest(BaseModel):
@@ -89,4 +90,6 @@ def chat(payload: ChatRequest):
     question = payload.message.strip()
     if not question:
         return {"answer": CHAT_PLACEHOLDER}
-    return {"answer": f"connected: {question}"}
+    # Gemini turns the question into SQL. 
+    sql = generate_sql(question)
+    return {"answer": f"Generated SQL: {sql}"}
