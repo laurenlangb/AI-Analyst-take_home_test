@@ -38,3 +38,11 @@ def get_schema():
             {"name": column["name"], "type": column["type"]} for column in columns
         ],
     }
+
+
+# Run an already-validated query and return its rows as dictionaries.
+def run_query(sql: str) -> list[dict]:
+    with get_db_connection() as connection:
+        rows = connection.execute(sql).fetchall()
+
+    return [dict(row) for row in rows]

@@ -13,8 +13,7 @@ from app.auth import (
     require_user,
 )
 from app.database import fetch_offers
-from app.gemini import generate_sql
-from app.validation import UnsafeSQLError, validate_sql
+from app.gemini import answer_question
 
 
 class ChatRequest(BaseModel):
@@ -92,12 +91,5 @@ def chat(payload: ChatRequest):
     if not question:
         return {"answer": CHAT_PLACEHOLDER}
 
-    # Gemini turns the question into SQL, which is then checked for safety
-    # before it would ever be run against the database.
-    sql = generate_sql(question)
-    try:
-        validate_sql(sql)
-    except UnsafeSQLError as error:
-        return {"answer": f"Query rejected: {error}"}
-
-    return {"answer": f"Validated SQL: {sql}"}
+    # answer_question runs the whole pipeline question pipeline
+    return {"answer": answer_question(question)}

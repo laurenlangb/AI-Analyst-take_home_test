@@ -1,11 +1,16 @@
-"""Turns question into a SQL query using the Gemini API."""
+"""Question-to-answer pipeline built on the Gemini API."""
 import json
+import logging
+import sqlite3
 
 from google import genai
 from google.genai import types
 
 from app.config import GEMINI_API_KEY
-from app.database import get_schema
+from app.database import get_schema, run_query
+from app.validation import UnsafeSQLError, validate_sql
+
+logger = logging.getLogger("app.gemini")
 
 GEMINI_MODEL = "gemini-2.5-flash"
 
@@ -13,12 +18,27 @@ GEMINI_MODEL = "gemini-2.5-flash"
 client = genai.Client(api_key=GEMINI_API_KEY)
 
 
-def build_prompt(question: str) -> str:
-    """Combine the table structure, SQL rules, and the user's question into one prompt."""
+class GeminiError(Exception):
+    """Raised when the Gemini API call fails or returns an unusable response."""
+
+
+class CannotAnswerError(Exception):
+    """Raised when the question cannot be answered from the available data."""
+
+
+def build_prompt(question: str, error_hint: str = "") -> str:
+    """Combine the table structure, SQL rules, the question, and any retry hint into one prompt."""
     schema = get_schema()
     columns = "\n".join(
         f"- {column['name']} ({column['type']})" for column in schema["columns"]
     )
+    # On a retry, tell Gemini why the previous attempt was rejected.
+    retry_note = ""
+    if error_hint:
+        retry_note = (
+            f"\nYour previous query was rejected: {error_hint}\n"
+            "Produce a corrected query.\n"
+        )
     return f"""You convert questions about a vehicle-offers dataset into a single SQLite SELECT query.
 
 Table: {schema['table']}
@@ -42,18 +62,91 @@ Rules:
 - Do not use SELECT * for analytical answers unless the user explicitly asks to see rows.
 - For list-style questions, include LIMIT 10 unless the user asks for a different number.
 - Use LOWER(column) for text comparisons when helpful.
-
-Respond only with JSON in the form {{"sql": "<query>"}}.
+- Round averaged or calculated numeric values to 2 decimal places using ROUND().
+{retry_note}
+Respond only with JSON, in one of these two forms:
+- {{"sql": "<query>"}} if the question can be answered from the columns above.
+- {{"error": "<reason>"}} if it cannot (for example, a question unrelated to this data).
 
 Question: {question}"""
 
 
-def generate_sql(question: str) -> str:
-    """Ask Gemini for a SQL query that answers the question and return it as a string."""
-    response = client.models.generate_content(
-        model=GEMINI_MODEL,
-        contents=build_prompt(question),
-        # Force the reply to be JSON so it can be parsed reliably.
-        config=types.GenerateContentConfig(response_mime_type="application/json"),
+def generate_sql(question: str, error_hint: str = "") -> str:
+    try:
+        response = client.models.generate_content(
+            model=GEMINI_MODEL,
+            contents=build_prompt(question, error_hint),
+            # Force the reply to be JSON so it can be parsed reliably.
+            config=types.GenerateContentConfig(response_mime_type="application/json"),
+        )
+        data = json.loads(response.text)
+    except Exception as error:  # network failure, API error, or invalid JSON
+        logger.warning("Gemini SQL generation failed: %s", error)
+        raise GeminiError(str(error))
+
+    # Gemini returns question out of scope for the dataset.
+    if "error" in data:
+        raise CannotAnswerError(data["error"])
+    # invalid query
+    if "sql" not in data:
+        raise GeminiError("Gemini response did not contain a query.")
+    return data["sql"]
+
+
+def summarize_answer(question: str, rows: list[dict]) -> str:
+    prompt = (
+        "You are summarizing the result of a data query for an end user.\n\n"
+        "Rules:\n"
+        "- Answer the user's question using only the data provided; do not invent anything.\n"
+        "- Do not perform any calculations or arithmetic; report only values already in the data.\n"
+        "- Do not mention SQL, databases, queries, JSON, rows, or backend implementation details.\n"
+        "- If the result is a single aggregate value, answer directly with that value.\n"
+        "- If the result has multiple records, summarize the most relevant ones clearly.\n"
+        "- Keep the answer to one or two concise sentences.\n\n"
+        f"User question:\n{question}\n\n"
+        f"Result data:\n{json.dumps(rows, ensure_ascii=False)}"
     )
-    return json.loads(response.text)["sql"]
+    try:
+        response = client.models.generate_content(model=GEMINI_MODEL, contents=prompt)
+        return response.text.strip()
+    except Exception as error:
+        logger.warning("Gemini answer summarising failed: %s", error)
+        raise GeminiError(str(error))
+
+
+def answer_question(question: str) -> str:
+    # Generate SQL from the question.
+    try:
+        sql = generate_sql(question)
+    except CannotAnswerError:
+        return "I can only answer questions about the data displayed."
+    except GeminiError:
+        return "The AI service is unavailable right now — please try again in a moment."
+
+    # Validate it. If it fails, retry once with the error fed back to Gemini.
+    try:
+        validate_sql(sql)
+    except UnsafeSQLError as first_error:
+        logger.info("Generated SQL rejected, retrying once: %s", first_error)
+        try:
+            sql = generate_sql(question, error_hint=str(first_error))
+            validate_sql(sql)
+        except (UnsafeSQLError, CannotAnswerError, GeminiError):
+            return "I couldn't answer that question — please try rephrasing it."
+
+    # Run the validated query.
+    try:
+        rows = run_query(sql)
+    except sqlite3.Error as error:
+        logger.warning("Query execution failed: %s", error)
+        return "Something went wrong while answering that — please try again"
+
+    if not rows:
+        return "I couldn't find anything in the data that answers that question."
+
+    # Turn the result into a human-readable answer.
+    try:
+        return summarize_answer(question, rows)
+    except GeminiError:
+        # If the summarising call fails, fall back to showing the raw result.
+        return f"Result: {json.dumps(rows)}"
