@@ -1,4 +1,6 @@
 fastapi
 jinja2
+pyjwt
 python-dotenv
+python-multipart
 uvicorn
