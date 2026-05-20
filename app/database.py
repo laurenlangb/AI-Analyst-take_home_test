@@ -32,6 +32,10 @@ def get_schema():
     with get_db_connection() as connection:
         columns = connection.execute(f"PRAGMA table_info({TABLE_NAME})").fetchall()
 
+    # Empty PRAGMA result means no table exists.
+    if not columns:
+        raise sqlite3.OperationalError(f"no such table: {TABLE_NAME}")
+
     return {
         "table": TABLE_NAME,
         "columns": [

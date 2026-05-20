@@ -86,10 +86,12 @@ Question: {question}"""
 
 
 def generate_sql(question: str, error_hint: str = "") -> str:
+    # Outside the try so schema DB errors stay sqlite3.Error, not GeminiError.
+    prompt = build_prompt(question, error_hint)
     try:
         response = client.models.generate_content(
             model=GEMINI_MODEL,
-            contents=build_prompt(question, error_hint),
+            contents=prompt,
             # Force the reply to be JSON so it can be parsed reliably.
             config=types.GenerateContentConfig(response_mime_type="application/json"),
         )
@@ -138,6 +140,9 @@ def answer_question(question: str) -> str:
         return "AI credit limit reached — please try again later."
     except GeminiError:
         return "The AI service is unavailable right now — please try again in a moment."
+    except sqlite3.Error as error:
+        logger.warning("Schema lookup failed: %s", error)
+        return "Could not read the offers data right now. Please try again."
 
     # Validate it. If it fails, retry once with the error fed back to Gemini.
     try:

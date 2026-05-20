@@ -1,8 +1,13 @@
-from fastapi import Depends, FastAPI, Form, Request
+import logging
+import sqlite3
+
+from fastapi import Depends, FastAPI, Form, HTTPException, Request
 from fastapi.responses import HTMLResponse, RedirectResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
+
+logger = logging.getLogger("app.main")
 
 from app.auth import (
     COOKIE_NAME,
@@ -86,7 +91,11 @@ def logout():
 
 @app.get("/api/data", dependencies=[Depends(require_user)])
 def get_data():
-    return {"data": fetch_offers()}
+    try:
+        return {"data": fetch_offers()}
+    except sqlite3.Error as error:
+        logger.warning("Failed to fetch offers: %s", error)
+        raise HTTPException(status_code=503, detail="Could not read the offers data right now.")
 
 
 @app.post("/api/chat", dependencies=[Depends(require_user)])

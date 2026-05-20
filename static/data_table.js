@@ -48,6 +48,14 @@ function redirectIfUnauthorized(response) {
   return false;
 }
 
+// Disable the chat form when the data is unavailable
+function disableChat() {
+  chatInput.disabled = true;
+  chatInput.placeholder = "Data unavailable — refresh to retry.";
+  const submitButton = chatForm.querySelector("button[type='submit']");
+  if (submitButton) submitButton.disabled = true;
+}
+
 // Fetch offer data from the API and render it into the table.
 async function loadOffers() {
   try {
@@ -65,6 +73,7 @@ async function loadOffers() {
   } catch (error) {
     tableBody.innerHTML = '<tr><td class="loading-cell">Unable to load offers.</td></tr>';
     rowCount.textContent = "Error";
+    disableChat();
   }
 }
 
