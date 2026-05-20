@@ -239,6 +239,28 @@ h2 {
   font-weight: 700;
 }
 
+.logout-form {
+  margin: 0;
+}
+
+.logout-button {
+  height: 32px;
+  padding: 0 12px;
+  border: 1px solid var(--line);
+  border-radius: 6px;
+  background: var(--surface);
+  color: var(--muted);
+  cursor: pointer;
+  font: inherit;
+  font-size: 0.85rem;
+  font-weight: 600;
+}
+
+.logout-button:hover {
+  border-color: var(--accent);
+  color: var(--accent);
+}
+
 .login-shell {
   min-height: 100vh;
   display: flex;

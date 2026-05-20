@@ -14,6 +14,9 @@
         <h1>Data Table</h1>
         <div class="header-meta">
           <span class="user-name">{{ user_name }}</span>
+          <form method="post" action="/api/logout" class="logout-form">
+            <button type="submit" class="logout-button">Log out</button>
+          </form>
           <div class="status-pill" id="row-count">Loading</div>
         </div>
       </header>

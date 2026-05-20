@@ -79,6 +79,14 @@ def login(request: Request, email: str = Form(...), password: str = Form(...)):
     return response
 
 
+@app.post("/api/logout")
+def logout():
+    # Drop the session cookie and send the user back to the login screen.
+    response = RedirectResponse("/login", status_code=303)
+    response.delete_cookie(COOKIE_NAME)
+    return response
+
+
 
 @app.get("/api/data", dependencies=[Depends(require_user)])
 def get_data():
