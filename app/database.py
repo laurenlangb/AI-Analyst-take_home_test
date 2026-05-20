@@ -9,7 +9,6 @@ with sqlite3.connect(f"file:{DATABASE_PATH}?mode=ro", uri=True) as _conn:
     TABLE_NAME = _conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchone()[0]
 
 
-# Open a read-only connection to the SQLite database, then close it afterwards.
 @contextmanager
 def get_db_connection():
     connection = sqlite3.connect(f"file:{DATABASE_PATH}?mode=ro", uri=True)
@@ -21,7 +20,6 @@ def get_db_connection():
         connection.close()
 
 
-# Fetch all rows and convert them into JSON-friendly dictionaries.
 def fetch_rows():
     with get_db_connection() as connection:
         rows = connection.execute(f"SELECT * FROM {TABLE_NAME}").fetchall()
@@ -29,7 +27,6 @@ def fetch_rows():
     return [dict(row) for row in rows]
 
 
-# Read the table's structure
 def get_schema():
     with get_db_connection() as connection:
         columns = connection.execute(f"PRAGMA table_info({TABLE_NAME})").fetchall()
@@ -46,7 +43,6 @@ def get_schema():
     }
 
 
-# Run an already-validated query and return its rows as dictionaries.
 def run_query(sql: str) -> list[dict]:
     with get_db_connection() as connection:
         rows = connection.execute(sql).fetchall()

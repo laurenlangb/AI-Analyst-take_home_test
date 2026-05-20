@@ -131,7 +131,6 @@ def summarize_answer(question: str, rows: list[dict]) -> str:
 
 
 def answer_question(question: str) -> str:
-    # Generate SQL from the question.
     try:
         sql = generate_sql(question)
     except CannotAnswerError:
@@ -157,7 +156,6 @@ def answer_question(question: str) -> str:
         except (UnsafeSQLError, CannotAnswerError, GeminiError):
             return "I couldn't answer that question — please try rephrasing it."
 
-    # Run the validated query.
     try:
         rows = run_query(sql)
     except sqlite3.Error as error:
@@ -167,7 +165,6 @@ def answer_question(question: str) -> str:
     if not rows:
         return "I couldn't find anything in the data that answers that question."
 
-    # Turn the result into a human-readable answer.
     try:
         return summarize_answer(question, rows)
     except RateLimitError:
