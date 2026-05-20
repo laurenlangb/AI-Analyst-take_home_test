@@ -1,5 +1,5 @@
-const tableHead = document.querySelector("#offers-head");
-const tableBody = document.querySelector("#offers-body");
+const tableHead = document.querySelector("#data-head");
+const tableBody = document.querySelector("#data-body");
 const rowCount = document.querySelector("#row-count");
 const chatHistory = document.querySelector("#chat-history");
 const chatForm = document.querySelector("#chat-form");
@@ -12,31 +12,45 @@ function formatHeader(value) {
 
 // Build the table headers and rows from API data.
 function renderTable(rows) {
+  tableHead.replaceChildren();
+  tableBody.replaceChildren();
+
   if (rows.length === 0) {
-    tableHead.innerHTML = "";
-    tableBody.innerHTML = '<tr><td class="loading-cell">No offers found.</td></tr>';
-    rowCount.textContent = "0 rows";
+    const emptyRow = document.createElement("tr");
+    const emptyCell = document.createElement("td");
+    emptyCell.className = "loading-cell";
+    emptyCell.textContent = "No data found.";
+    emptyRow.append(emptyCell);
+    tableBody.append(emptyRow);
+    rowCount.textContent = "No records found";
     return;
   }
 
   const columns = Object.keys(rows[0]);
-  tableHead.innerHTML = `
-    <tr>
-      ${columns.map((column) => `<th scope="col">${formatHeader(column)}</th>`).join("")}
-    </tr>
-  `;
 
-  tableBody.innerHTML = rows
-    .map(
-      (row) => `
-        <tr>
-          ${columns.map((column) => `<td><div class="cell">${row[column] || ""}</div></td>`).join("")}
-        </tr>
-      `,
-    )
-    .join("");
+  const headerRow = document.createElement("tr");
+  for (const column of columns) {
+    const th = document.createElement("th");
+    th.scope = "col";
+    th.textContent = formatHeader(column);
+    headerRow.append(th);
+  }
+  tableHead.append(headerRow);
 
-  rowCount.textContent = `${rows.length} row${rows.length === 1 ? "" : "s"}`;
+  for (const row of rows) {
+    const tr = document.createElement("tr");
+    for (const column of columns) {
+      const td = document.createElement("td");
+      const cell = document.createElement("div");
+      cell.className = "cell";
+      cell.textContent = row[column] ?? "";
+      td.append(cell);
+      tr.append(td);
+    }
+    tableBody.append(tr);
+  }
+
+  rowCount.textContent = `Showing 1 to ${rows.length} of ${rows.length}`;
 }
 
 // Send the browser to the login page when a request returns 401 Unauthorized.
@@ -56,8 +70,8 @@ function disableChat() {
   if (submitButton) submitButton.disabled = true;
 }
 
-// Fetch offer data from the API and render it into the table.
-async function loadOffers() {
+// Fetch data from the API and render it into the table.
+async function loadData() {
   try {
     const response = await fetch("/api/data");
 
@@ -65,13 +79,13 @@ async function loadOffers() {
       return;
     }
     if (!response.ok) {
-      throw new Error("Could not load offers");
+      throw new Error("Could not load data");
     }
 
     const payload = await response.json();
     renderTable(payload.data);
   } catch (error) {
-    tableBody.innerHTML = '<tr><td class="loading-cell">Unable to load offers.</td></tr>';
+    tableBody.innerHTML = '<tr><td class="loading-cell">Unable to load data.</td></tr>';
     rowCount.textContent = "Error";
     disableChat();
   }
@@ -140,4 +154,4 @@ chatForm.addEventListener("submit", (event) => {
   chatInput.value = "";
 });
 
-loadOffers();
+loadData();

@@ -1,3 +1,4 @@
+"""Loads the .env variables from the environment"""
 import os
 from pathlib import Path
 

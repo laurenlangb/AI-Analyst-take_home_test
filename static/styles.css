@@ -5,8 +5,8 @@
   --text: #18202b;
   --muted: #657083;
   --line: #d9dee7;
-  --accent: #0f766e;
-  --accent-soft: #e7f5f3;
+  --accent: #ec4899;
+  --accent-soft: #fce7f3;
   --shadow: 0 14px 40px rgba(29, 40, 55, 0.08);
 }
 
@@ -42,16 +42,13 @@ h1 {
   line-height: 1;
 }
 
-.status-pill {
-  min-width: 92px;
-  border: 1px solid var(--line);
-  border-radius: 999px;
-  background: var(--accent-soft);
-  color: #14534e;
-  padding: 8px 14px;
-  text-align: center;
-  font-size: 0.9rem;
-  font-weight: 700;
+.table-summary {
+  padding: 10px 16px;
+  border-top: 1px solid var(--line);
+  background: #fbfcfd;
+  color: var(--muted);
+  font-size: 0.85rem;
+  text-align: right;
 }
 
 .table-section,
@@ -189,7 +186,7 @@ h2 {
 .chat-form input:focus,
 .login-card input:focus {
   border-color: var(--accent);
-  outline: 3px solid rgba(15, 118, 110, 0.16);
+  outline: 3px solid rgba(236, 72, 153, 0.16);
 }
 
 .chat-form button,
@@ -210,7 +207,7 @@ h2 {
 
 .chat-form button:hover,
 .login-card button:hover {
-  background: #0d655e;
+  background: #db2777;
 }
 
 .sr-only {

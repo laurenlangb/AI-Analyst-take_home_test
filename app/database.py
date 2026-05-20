@@ -1,10 +1,12 @@
+"""Retrieve the database components from the DATABASE_PATH"""
 import sqlite3
 from contextlib import contextmanager
 
 from app.config import DATABASE_PATH
 
-# The provided database - its name is reused across queries.
-TABLE_NAME = "offers"
+# Discover the table name from the database.
+with sqlite3.connect(f"file:{DATABASE_PATH}?mode=ro", uri=True) as _conn:
+    TABLE_NAME = _conn.execute("SELECT name FROM sqlite_master WHERE type='table'").fetchone()[0]
 
 
 # Open a read-only connection to the SQLite database, then close it afterwards.
@@ -19,8 +21,8 @@ def get_db_connection():
         connection.close()
 
 
-# Fetch all offer rows and convert them into JSON-friendly dictionaries.
-def fetch_offers():
+# Fetch all rows and convert them into JSON-friendly dictionaries.
+def fetch_rows():
     with get_db_connection() as connection:
         rows = connection.execute(f"SELECT * FROM {TABLE_NAME}").fetchall()
 

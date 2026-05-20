@@ -51,7 +51,7 @@ def build_prompt(question: str, error_hint: str = "") -> str:
             f"\nYour previous query was rejected: {error_hint}\n"
             "Produce a corrected query.\n"
         )
-    return f"""You convert questions about a vehicle-offers dataset into a single SQLite SELECT query.
+    return f"""You convert questions about a dataset into a single SQLite SELECT query.
 
 Table: {schema['table']}
 Columns:
@@ -142,7 +142,7 @@ def answer_question(question: str) -> str:
         return "The AI service is unavailable right now — please try again in a moment."
     except sqlite3.Error as error:
         logger.warning("Schema lookup failed: %s", error)
-        return "Could not read the offers data right now. Please try again."
+        return "Could not read the data right now. Please try again."
 
     # Validate it. If it fails, retry once with the error fed back to Gemini.
     try:

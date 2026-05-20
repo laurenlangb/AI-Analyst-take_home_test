@@ -1,4 +1,4 @@
-"""JWT session auth with hardcoded credentials, per the take-home brief."""
+"""JWT session auth with hardcoded credentials for now"""
 from __future__ import annotations
 
 from datetime import datetime, timedelta, timezone
@@ -49,7 +49,7 @@ def get_current_user(request: Request) -> dict | None:
         # Check the signature and expiry, then hand back the stored payload.
         return jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
     except jwt.PyJWTError:
-        # Token is expired, tampered with, or otherwise invalid.
+        # Token is invalid.
         return None
 
 

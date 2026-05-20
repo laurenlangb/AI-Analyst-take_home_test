@@ -17,7 +17,7 @@ from app.auth import (
     get_current_user,
     require_user,
 )
-from app.database import fetch_offers
+from app.database import TABLE_NAME, fetch_rows
 from app.gemini import answer_question
 
 
@@ -55,6 +55,7 @@ def dashboard(request: Request):
         {
             "request": request,
             "user_name": user["name"],
+            "table": {"head": TABLE_NAME},
         },
     )
 
@@ -92,10 +93,10 @@ def logout():
 @app.get("/api/data", dependencies=[Depends(require_user)])
 def get_data():
     try:
-        return {"data": fetch_offers()}
+        return {"data": fetch_rows()}
     except sqlite3.Error as error:
-        logger.warning("Failed to fetch offers: %s", error)
-        raise HTTPException(status_code=503, detail="Could not read the offers data right now.")
+        logger.warning("Failed to fetch data: %s", error)
+        raise HTTPException(status_code=503, detail="Could not read the data right now.")
 
 
 @app.post("/api/chat", dependencies=[Depends(require_user)])
