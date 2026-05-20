@@ -20,9 +20,6 @@ class ChatRequest(BaseModel):
     message: str
 
 
-# Shown in the chat answer box before the user asks anything, and for blank questions.
-CHAT_PLACEHOLDER = "Ask a question about the offers data."
-
 app = FastAPI()
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
@@ -52,7 +49,6 @@ def dashboard(request: Request):
         "data_table.html",
         {
             "request": request,
-            "chat_placeholder": CHAT_PLACEHOLDER,
             "user_name": user["name"],
         },
     )
@@ -97,7 +93,7 @@ def get_data():
 def chat(payload: ChatRequest):
     question = payload.message.strip()
     if not question:
-        return {"answer": CHAT_PLACEHOLDER}
+        return {"answer": "Please type a question."}
 
     # answer_question runs the whole pipeline question pipeline
     return {"answer": answer_question(question)}

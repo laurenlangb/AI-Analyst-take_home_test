@@ -68,13 +68,9 @@ async function loadOffers() {
   }
 }
 
-// Append a (question, "Thinking...") pair to the history and return the
+// Append a question + answer pair to the history and return the
 // answer element so the caller can fill it in once the response arrives.
 function appendHistoryItem(question) {
-  // Drop the empty-state placeholder the first time a question is asked.
-  const empty = chatHistory.querySelector(".chat-empty");
-  if (empty) empty.remove();
-
   const item = document.createElement("div");
   item.className = "chat-item";
 
