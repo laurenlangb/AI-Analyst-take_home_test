@@ -1,3 +1,4 @@
+"""FastAPI app: routes for login, logout, data, and chat."""
 import logging
 import sqlite3
 

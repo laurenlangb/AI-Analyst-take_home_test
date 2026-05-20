@@ -12,7 +12,7 @@ from app.validation import UnsafeSQLError, validate_sql
 
 logger = logging.getLogger("app.gemini")
 
-GEMINI_MODEL = "gemini-2.5-flash-lite"
+GEMINI_MODEL = "gemini-2.5-flash"
 
 # One client is created at startup and reused for every request.
 client = genai.Client(api_key=GEMINI_API_KEY)

@@ -1,3 +1,4 @@
+"""Unit tests for the sqlglot-based SQL safety validator."""
 import unittest
 from unittest.mock import patch
 

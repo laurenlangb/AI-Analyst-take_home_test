@@ -1,3 +1,4 @@
+"""Unit tests for JWT session auth and credential checks."""
 import unittest
 from datetime import datetime, timedelta, timezone
 from unittest.mock import Mock
