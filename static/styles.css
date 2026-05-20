@@ -74,7 +74,8 @@ h1 {
 }
 
 table {
-  width: 100%;
+  width: max-content;
+  min-width: 100%;
   border-collapse: separate;
   border-spacing: 0;
   font-size: 0.88rem;
@@ -96,7 +97,7 @@ td {
 }
 
 .cell {
-  max-width: 240px;
+  max-width: 400px;
   overflow-wrap: anywhere;
 }
 
@@ -133,8 +134,10 @@ h2 {
   line-height: 1.2;
 }
 
-.chat-answer {
+.chat-history {
   min-height: 88px;
+  max-height: 360px;
+  overflow-y: auto;
   border: 1px solid var(--line);
   border-radius: 6px;
   background: #fbfcfd;
@@ -142,6 +145,34 @@ h2 {
   line-height: 1.5;
   padding: 14px;
   margin-bottom: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.chat-empty {
+  margin: 0;
+  color: var(--muted);
+}
+
+.chat-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.chat-question {
+  margin: 0;
+  font-weight: 700;
+}
+
+.chat-answer-text {
+  margin: 0;
+}
+
+.chat-answer-text.is-thinking {
+  color: var(--muted);
+  font-style: italic;
 }
 
 .chat-form {

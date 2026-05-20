@@ -1,12 +1,9 @@
 const tableHead = document.querySelector("#offers-head");
 const tableBody = document.querySelector("#offers-body");
 const rowCount = document.querySelector("#row-count");
-const chatAnswer = document.querySelector("#chat-answer");
+const chatHistory = document.querySelector("#chat-history");
 const chatForm = document.querySelector("#chat-form");
 const chatInput = document.querySelector("#chat-input");
-
-// Empty-state text the server rendered into the answer box; reused for blank input.
-const chatPlaceholder = chatAnswer.textContent;
 
 // Convert database column names into readable table headers.
 function formatHeader(value) {
@@ -71,9 +68,34 @@ async function loadOffers() {
   }
 }
 
-// Send the user's question to the chat API and display the answer.
+// Append a (question, "Thinking...") pair to the history and return the
+// answer element so the caller can fill it in once the response arrives.
+function appendHistoryItem(question) {
+  // Drop the empty-state placeholder the first time a question is asked.
+  const empty = chatHistory.querySelector(".chat-empty");
+  if (empty) empty.remove();
+
+  const item = document.createElement("div");
+  item.className = "chat-item";
+
+  const questionEl = document.createElement("p");
+  questionEl.className = "chat-question";
+  questionEl.textContent = question;
+
+  const answerEl = document.createElement("p");
+  answerEl.className = "chat-answer-text is-thinking";
+  answerEl.textContent = "Thinking...";
+
+  item.append(questionEl, answerEl);
+  chatHistory.append(item);
+  chatHistory.scrollTop = chatHistory.scrollHeight;
+
+  return answerEl;
+}
+
+// Send the user's question to the chat API and fill in the corresponding answer.
 async function submitChat(message) {
-  chatAnswer.textContent = "Thinking...";
+  const answerEl = appendHistoryItem(message);
 
   try {
     const response = await fetch("/api/chat", {
@@ -92,9 +114,12 @@ async function submitChat(message) {
     }
 
     const payload = await response.json();
-    chatAnswer.textContent = payload.answer;
+    answerEl.textContent = payload.answer;
   } catch (error) {
-    chatAnswer.textContent = "Unable to answer right now.";
+    answerEl.textContent = "Unable to answer right now.";
+  } finally {
+    answerEl.classList.remove("is-thinking");
+    chatHistory.scrollTop = chatHistory.scrollHeight;
   }
 }
 
@@ -102,9 +127,7 @@ chatForm.addEventListener("submit", (event) => {
   event.preventDefault();
 
   const message = chatInput.value.trim();
-
   if (!message) {
-    chatAnswer.textContent = chatPlaceholder;
     return;
   }
 
