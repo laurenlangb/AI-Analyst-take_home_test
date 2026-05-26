@@ -1,4 +1,4 @@
-# AI Solutions Analyst — Technical Assessment - Submission
+# AI Analyst — Technical Assessment - Submission
 
 ## Project layout
 
